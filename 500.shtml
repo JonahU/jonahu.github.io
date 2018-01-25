@@ -1,0 +1,16 @@
+<html>
+
+	<title>
+	You shouldn't be here
+	</title>
+
+	<body>
+		
+		<h1>500 Error</h1>
+		<h3>Oops, Internal server error</h3>
+		<p>
+		<a href="/">Click here</a> to go to the homepage.
+		</p>
+
+	</body>
+</html>
