@@ -1,34 +1,73 @@
-<!DOCTYPE html>
-<html lang="en-GB">
-<html>
+<!doctype html>
+<html lang="en">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>Jonah's website</title>
-
-    <meta name="author" content="Jonah Usadi">
+    <meta name="author" content="Jonah Usadi" />
     <meta name="description" content="Jonah's website" />
-
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
-    <link href="styles/style.css" rel="stylesheet" type="text/css">
-
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
   </head>
+
   <body>
-    <h1>Jonah Usadi</h1>
+    <h1>Jonah Usadi ( ° ∀ ° )ﾉﾞ</h1>
 
-    <p>( ° ∀ ° )ﾉﾞ</p>
-    <p><b>Hello, welcome to my website!</b></p>
-    <p>Kid who codes stuff. From London, living in Chicago.</p>
+    <h1 id="counter-display"></h1>
+    <button onclick="incrementCounter()">+</button>
+    <button onclick="decrementCounter()">-</button>
+    <button onclick="resetCounter()">Reset</button>
+    <button onclick="displayCode()">Show Source</button>
+    <pre><code id="counter-code" style="display:none"></code></pre>
 
-    <p>Download my MacOS app DownTime <a href="https://itunes.apple.com/us/app/downtime-menubar-sleep-wake-tracker/id1267417780?mt=12" title="DownTime" class="link">here</a>.</p>
+    <script>
+      const initialVal = 0;
+      const display = document.getElementById("counter-display");
+      const updateDisplay = (i) => (display.textContent = `Counter: ${i}`);
+      updateDisplay(initialVal);
 
-    <h2><u>Links</u></h2>
+      WebAssembly.instantiateStreaming(fetch("counter.wasm")).then(
+        ({ instance }) => {
+          const { increment, decrement, set } = instance.exports;
+          set(initialVal);
+          window.resetCounter = () => updateDisplay(set(initialVal));
+          window.incrementCounter = () => updateDisplay(increment());
+          window.decrementCounter = () => updateDisplay(decrement());
+        },
+      );
+
+      let codeLoaded = false;
+      window.displayCode = () => {
+        const code = document.getElementById("counter-code");
+        const button = document.querySelector(
+          "button[onclick='displayCode()']",
+        );
+
+        if (code.style.display === "none") {
+          if (!codeLoaded) {
+            fetch("counter.c")
+              .then((res) => res.text())
+              .then((text) => {
+                code.textContent = text;
+                codeLoaded = true;
+              });
+          }
+          code.style.display = "block";
+          button.textContent = "Hide Source";
+        } else {
+          code.style.display = "none";
+          button.textContent = "Show Source";
+        }
+      };
+    </script>
+
+    <h2>Contact me</h2>
     <ul>
-        <li><a href="https://www.linkedin.com/in/jonah-usadi" title="Jonah Usadi | LinkedIn" class="link">LinkedIn</a></li>
-        <li><a href="https://github.com/JonahU" title="JonahU · GitHub" class="link">GitHub</a></li>
-        <li><a href="mailto:jonahusadi@gmail.com?subject=Website%20inqiry" target="_top" class="link">Email Me</a></li>
+      <li><a href="https://www.linkedin.com/in/jonah-usadi">LinkedIn</a></li>
+      <li><a href="https://github.com/JonahU">GitHub</a></li>
+      <li>
+        <a href="mailto:jonahusadi@gmail.com?subject=Website%20inquiry"
+          >Email Me</a
+        >
+      </li>
     </ul>
-
-<!-- <script src="scripts/main.js"></script> -->
   </body>
 </html>
