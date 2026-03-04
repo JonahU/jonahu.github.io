@@ -1,15 +1,18 @@
 CC = /opt/homebrew/opt/llvm/bin/clang
-
-counter.wasm: counter.c
-	$(CC) --target=wasm32 \
+CFLAGS = --target=wasm32 \
 		-nostdlib \
 		-Wl,--no-entry \
-		-Wl,--export=increment \
-		-Wl,--export=decrement \
-		-Wl,--export=set \
-		-o counter.wasm \
-		counter.c
+		-Wl,--export-all \
+		-Wl,--allow-undefined
+
+all: counter.wasm string.wasm
+
+counter.wasm: counter.c
+	$(CC) $(CFLAGS) -o counter.wasm counter.c
+
+string.wasm: string.c
+	$(CC) $(CFLAGS) -o string.wasm string.c
 
 clean:
-	rm -f counter.wasm
+	rm -f counter.wasm string.wasm
 	

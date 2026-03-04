@@ -15,41 +15,72 @@
     <button onclick="incrementCounter()">+</button>
     <button onclick="decrementCounter()">-</button>
     <button onclick="resetCounter()">Reset</button>
-    <button onclick="displayCode()">Show Source</button>
+    <button id="counter-code-button" onclick="displayCode('counter')">
+      Show Source
+    </button>
     <pre><code id="counter-code" style="display:none"></code></pre>
 
+    <h1 id="string-display">""</h1>
+    <input type="text" id="string-input" />
+    <button onclick="setString()">Set</button>
+    <button id="string-code-button" onclick="displayCode('string')">
+      Show Source
+    </button>
+    <pre><code id="string-code" style="display:none"></code></pre>
+
     <script>
-      const initialVal = 0;
-      const display = document.getElementById("counter-display");
-      const updateDisplay = (i) => (display.textContent = `Counter: ${i}`);
-      updateDisplay(initialVal);
+      const counterDisplay = document.getElementById("counter-display");
+      const updateCounterDisplay = (i) =>
+        (counterDisplay.textContent = `Counter: ${i}`);
+      updateCounterDisplay(0);
+
+      const stringDisplay = document.getElementById("string-display");
+      const updateStringDisplay = (s) => (stringDisplay.textContent = `"${s}"`);
+      updateStringDisplay(""); // set initial val
 
       WebAssembly.instantiateStreaming(fetch("counter.wasm")).then(
         ({ instance }) => {
           const { increment, decrement, set } = instance.exports;
-          set(initialVal);
-          window.resetCounter = () => updateDisplay(set(initialVal));
-          window.incrementCounter = () => updateDisplay(increment());
-          window.decrementCounter = () => updateDisplay(decrement());
+          window.resetCounter = () => updateCounterDisplay(set(0));
+          window.incrementCounter = () => updateCounterDisplay(increment());
+          window.decrementCounter = () => updateCounterDisplay(decrement());
         },
       );
 
-      let codeLoaded = false;
-      window.displayCode = () => {
-        const code = document.getElementById("counter-code");
-        const button = document.querySelector(
-          "button[onclick='displayCode()']",
-        );
+      WebAssembly.instantiateStreaming(fetch("string.wasm")).then(
+        ({ instance }) => {
+          const { get, set, memory, scratch } = instance.exports;
+          const readString = () => {
+            const ptr = get();
+            const bufView = new Uint8Array(memory.buffer);
+            const nullTerm = bufView.indexOf(0, ptr);
+            return new TextDecoder().decode(bufView.subarray(ptr, nullTerm));
+          };
+          const writeString = () => {
+            const str = document.getElementById("string-input").value;
+            const encoded = new TextEncoder().encode(str);
+            const ptr = get();
+            new Uint8Array(memory.buffer).set(encoded, scratch);
+            set(scratch, encoded.length);
+          };
+
+          window.setString = (str, len) => {
+            writeString();
+            updateStringDisplay(readString());
+          };
+        },
+      );
+
+      window.displayCode = (name) => {
+        const code = document.getElementById(`${name}-code`);
+        const button = document.getElementById(`${name}-code-button`);
 
         if (code.style.display === "none") {
-          if (!codeLoaded) {
-            fetch("counter.c")
-              .then((res) => res.text())
-              .then((text) => {
-                code.textContent = text;
-                codeLoaded = true;
-              });
-          }
+          fetch(`${name}.c`)
+            .then((res) => res.text())
+            .then((text) => {
+              code.textContent = text;
+            });
           code.style.display = "block";
           button.textContent = "Hide Source";
         } else {
