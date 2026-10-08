@@ -4,15 +4,16 @@ CFLAGS = --target=wasm32 \
 		-Wl,--no-entry \
 		-Wl,--export-all \
 		-Wl,--allow-undefined
+WASM_DIR = wasm
 
 all: counter.wasm string.wasm
 
-counter.wasm: counter.c
-	$(CC) $(CFLAGS) -o counter.wasm counter.c
+counter.wasm: $(WASM_DIR)/counter.c
+	$(CC) $(CFLAGS) $(WASM_DIR)/counter.c -o $(WASM_DIR)/counter.wasm
 
-string.wasm: string.c
-	$(CC) $(CFLAGS) -o string.wasm string.c
+string.wasm: $(WASM_DIR)/string.c
+	$(CC) $(CFLAGS) $(WASM_DIR)/string.c -o $(WASM_DIR)/string.wasm 
 
 clean:
-	rm -f counter.wasm string.wasm
+	rm -f $(WASM_DIR)/*.wasm
 	
