@@ -2,7 +2,7 @@ const stringDisplay = document.getElementById("string-display");
 const updateStringDisplay = (s) => (stringDisplay.textContent = `"${s}"`);
 updateStringDisplay(""); // set initial val
 
-WebAssembly.instantiateStreaming(fetch("string.wasm")).then(({ instance }) => {
+WebAssembly.instantiateStreaming(fetch("wasm/string.wasm")).then(({ instance }) => {
   const { get, set, memory, scratch } = instance.exports;
   const readString = () => {
     const ptr = get();
